@@ -1,0 +1,89 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        header {
+            background-color: #f0f0f0;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+            header img {
+                height: 50px;
+                margin-right: 10px;
+            }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .card {
+            width: 1000px;
+            height: 600px;
+            border: 1px solid #ccc;
+            /* Здесь будет содержимое карточки */
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .prev-button, .next-button {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            margin: 0 5px;
+            width: 50px;
+            height: 200px;
+        }
+
+        .delete-button, .add-button {
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="../Img/memento.jpg" alt="Помни" />
+        <h1>Заголовок</h1>
+    </header>
+
+    <div class="container">
+        <button class="btn btn-primary prev-button">Влево</button>
+        <div class="card">
+            <!-- Содержимое карточки -->
+        </div>
+        <button class="btn btn-primary next-button">Вправо</button>
+    </div>
+
+    <div class="actions">
+        <button class="btn btn-danger delete-button">Удалить карточку</button>
+        <button class="btn btn-success add-button">Добавить карточку</button>
+    </div>
+
+</body>
+</html>
