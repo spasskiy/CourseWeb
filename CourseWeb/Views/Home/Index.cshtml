@@ -1,15 +1,19 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
-
+﻿@model CourseWeb.Models.Card
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Главная страница</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
+        font-face {
+            font-family: 'Balkar';
+            src: url('Balkar.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         body {
             font-family: sans-serif;
         }
@@ -18,13 +22,23 @@
             background-color: #f0f0f0;
             padding: 20px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
         }
 
             header img {
-                height: 50px;
-                margin-right: 10px;
+                width: 200px;
+                height: 100px;
+                object-fit: cover;
             }
+
+        header h1 {
+            font-family: 'Balkar', 'Comic Sans MS', sans-serif;
+            font-size: 54px;
+            margin: 0;
+            flex-grow: 1;
+            text-align: center;
+        }
 
         .container {
             display: flex;
@@ -58,32 +72,186 @@
             margin: 0 5px;
             width: 50px;
             height: 200px;
+            font-weight: bold;
+            font-size: 18px;
         }
 
+            .prev-button:hover, .next-button:hover {
+                background-color: yellow;
+                color: black;
+                
+            }
         .delete-button, .add-button {
             margin: 0 5px;
+        }
+
+        .flip-button {
+            margin: 0 5px;
+        }
+
+        .card-text {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 24px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <img src="../Img/memento.jpg" alt="Помни" />
-        <h1>Заголовок</h1>
+        <img src="Memento.jpg" alt="Помни">
+        <h1>Запомни всё</h1>
+        <img src="remember.jpeg" alt="Всё!">
     </header>
 
     <div class="container">
-        <button class="btn btn-primary prev-button">Влево</button>
+        <button class="btn btn-primary prev-button">Не помню</button>
         <div class="card">
-            <!-- Содержимое карточки -->
+            <p id="cardText" class="card-text">@Model.Front</p>
         </div>
-        <button class="btn btn-primary next-button">Вправо</button>
+        <button id="rememberButton" class="btn btn-primary next-button">Помню</button>
+    </div>
+    <div class="actions">
+        <button class="btn btn-info flip-button" style="width: calc(50% - 5px);">Перевернуть карточку</button>
+    </div>
+    <div class="actions">        
+        <button class="btn btn-success add-button">Добавить карточку</button>
+        <button class="btn btn-danger delete-button">Удалить карточку</button>        
     </div>
 
-    <div class="actions">
-        <button class="btn btn-danger delete-button">Удалить карточку</button>
-        <button class="btn btn-success add-button">Добавить карточку</button>
-    </div>
+    <!-- Скрипт переворота карточки -->
+    <script>
+        var isFront = true;
+        var frontText = '@Html.Raw(Model.Front)';
+        var backText = '@Html.Raw(Model.Back)';
+
+        function flipCard() {
+            var cardText = document.getElementById('cardText');
+
+            // Проверяем, пуста ли колода
+            if (frontText === "") {
+                return; // Если пуста, выходим из функции без переворота карточки
+            }
+
+            if (isFront) {
+                cardText.innerHTML = backText;
+            } else {
+                cardText.innerHTML = frontText;
+            }
+            isFront = !isFront;
+        }
+
+        document.querySelector('.flip-button').addEventListener('click', flipCard);
+    </script>
+
+    <!-- Скрипт кнопки "Помню" -->
+    <script>
+        document.getElementById('rememberButton').addEventListener('click', function () {
+            fetch('/Home/RememberClick', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data === null) {
+                        // Если колода пуста, отображаем сообщение "Колода пуста"
+                        document.getElementById('cardText').innerText = "Колода пуста";
+
+                        // Очищаем значения переменных frontText и backText
+                        frontText = "";
+                        backText = "";
+                    } else {
+                        // Обновляем текст на лицевой стороне карточки
+                        document.getElementById('cardText').innerText = data.front;
+
+                        // Обновляем значения frontText и backText
+                        frontText = data.front;
+                        backText = data.back;
+
+                        // Сбрасываем переменную isFront в true
+                        isFront = true;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+
+
+    <!-- Скрипт кнопки "Не помню" -->
+    <script>
+        document.querySelector('.prev-button').addEventListener('click', function () {
+            fetch('/Home/NotRememberClick', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data !== null) {
+                        // Обновляем текст на лицевой стороне карточки
+                        document.getElementById('cardText').innerText = data.front;
+
+                        // Обновляем значения frontText и backText
+                        frontText = data.front;
+                        backText = data.back;
+
+                        // Сбрасываем переменную isFront в true
+                        isFront = true;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+
+    <!-- Скрипт кнопки "Удалить карточку" -->
+    <script>
+        document.querySelector('.delete-button').addEventListener('click', function () {
+            fetch('/Home/DropCard', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data === null) {
+                        // Если карточек больше нет, отображаем сообщение "Колода пуста"
+                        document.getElementById('cardText').innerText = "Колода пуста";
+
+                        // Очищаем значения переменных frontText и backText
+                        frontText = "";
+                        backText = "";
+                    } else {
+                        // Обновляем текст на лицевой стороне карточки
+                        document.getElementById('cardText').innerText = data.front;
+
+                        // Обновляем значения переменных frontText и backText
+                        frontText = data.front;
+                        backText = data.back;
+
+                        // Сбрасываем переменную isFront в true
+                        isFront = true;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+    <!-- Скрипт обработки нажатия клавиш -->
+    <script>
+        // Обработка нажатия клавиш
+        document.addEventListener('keydown', function (event) {
+            if (event.key === ' ') {
+                // Нажата клавиша пробел, повернуть карточку
+                flipCard();
+            } else if (event.key === 'ArrowRight') {
+                // Нажата клавиша стрелка вправо, нажать кнопку "Помню"
+                document.getElementById('rememberButton').click();
+            } else if (event.key === 'ArrowLeft') {
+                // Нажата клавиша стрелка влево, нажать кнопку "Не помню"
+                document.querySelector('.prev-button').click();
+            }
+        });
+    </script>
+
+
+
 
 </body>
 </html>

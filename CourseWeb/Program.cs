@@ -1,3 +1,5 @@
+using CourseWeb.Models;
+
 namespace CourseWeb
 {
     public class Program
