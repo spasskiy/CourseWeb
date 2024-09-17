@@ -14,7 +14,7 @@ namespace CourseWeb.Controllers
 
         public IActionResult Index()
         {
-            if(CardKeeper.Head is null)
+            if (CardKeeper.Head is null)
             {
                 CardKeeper.Head = new Card
                 {
@@ -53,7 +53,7 @@ namespace CourseWeb.Controllers
         [HttpPost]
         public IActionResult NotRememberClick()
         {
-            if(CardKeeper.Head is not null)
+            if (CardKeeper.Head is not null)
                 CardKeeper.Head = CardKeeper.Head.MoveNext(CardKeeper.Head, true);
             return Json(CardKeeper.Head);
         }
@@ -64,6 +64,28 @@ namespace CourseWeb.Controllers
             if (CardKeeper.Head is not null)
                 CardKeeper.Head = CardKeeper.Head.Next;
             return Json(CardKeeper.Head);
-    }
+        }
+
+        [HttpPost]
+        public IActionResult AddCard([FromBody] Card newCard)
+        {
+            if (CardKeeper.Head == null)
+            {
+                // ≈сли колода пуста, создаем новую голову колоды
+                CardKeeper.Head = new Card
+                {
+                    Front = newCard.Front,
+                    Back = newCard.Back,
+                    Priority = 1
+                };
+            }
+            else
+            {
+                // ¬ставл€ем новую карточку на вторую позицию
+                Card.InsertCardAtSecondPosition(CardKeeper.Head, newCard.Front, newCard.Back, 1);
+            }
+
+            return Json(new { success = true });
+        }
     }
 }

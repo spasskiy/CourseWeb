@@ -97,6 +97,18 @@
             font-size: 24px;
             font-weight: bold;
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -120,6 +132,15 @@
     <div class="actions">        
         <button class="btn btn-success add-button">Добавить карточку</button>
         <button class="btn btn-danger delete-button">Удалить карточку</button>        
+    </div>
+
+    <!-- Модальное окно -->
+    <div id="modal" class="modal">
+        <h2>Добавить карточку</h2>
+        <input type="text" id="frontInput" placeholder="Лицевая сторона">
+        <input type="text" id="backInput" placeholder="Обратная сторона">
+        <button id="okButton">ОК</button>
+        <button id="cancelButton">Отмена</button>
     </div>
 
     <!-- Скрипт переворота карточки -->
@@ -178,7 +199,6 @@
         });
     </script>
 
-
     <!-- Скрипт кнопки "Не помню" -->
     <script>
         document.querySelector('.prev-button').addEventListener('click', function () {
@@ -233,25 +253,87 @@
                 });
         });
     </script>
+
     <!-- Скрипт обработки нажатия клавиш -->
     <script>
+        let isDelayActive = false;
+
         // Обработка нажатия клавиш
         document.addEventListener('keydown', function (event) {
-            if (event.key === ' ') {
-                // Нажата клавиша пробел, повернуть карточку
-                flipCard();
-            } else if (event.key === 'ArrowRight') {
-                // Нажата клавиша стрелка вправо, нажать кнопку "Помню"
-                document.getElementById('rememberButton').click();
-            } else if (event.key === 'ArrowLeft') {
-                // Нажата клавиша стрелка влево, нажать кнопку "Не помню"
-                document.querySelector('.prev-button').click();
+            if (!isDelayActive) {
+                isDelayActive = true;
+                setTimeout(function () {
+                    isDelayActive = false;
+                }, 250); // 1 second delay
+
+                if (event.key === ' ') {
+                    // Нажата клавиша пробел, повернуть карточку
+                    flipCard();
+                } else if (event.key === 'ArrowRight') {
+                    // Нажата клавиша стрелка вправо, нажать кнопку "Помню"
+                    document.getElementById('rememberButton').click();
+                } else if (event.key === 'ArrowLeft') {
+                    // Нажата клавиша стрелка влево, нажать кнопку "Не помню"
+                    document.querySelector('.prev-button').click();
+                }
             }
         });
     </script>
 
+    <!-- Скрипт кнопки "Добавить карточку" -->
+    <script>
+        document.querySelector('.add-button').addEventListener('click', function () {
+            console.log('Кнопка "Добавить карточку" была нажата');
 
+            // Отображаем модальное окно
+            document.getElementById('modal').style.display = 'block';
+        });
 
+        document.getElementById('cancelButton').addEventListener('click', function () {
+            console.log('Кнопка "Отмена" была нажата');
+
+            // Скрываем модальное окно
+            document.getElementById('modal').style.display = 'none';
+        });
+
+        document.getElementById('okButton').addEventListener('click', function () {
+            console.log('Кнопка "ОК" была нажата');
+
+            // Получаем значения текстовых полей
+            const frontText = document.getElementById('frontInput').value;
+            const backText = document.getElementById('backInput').value;
+
+            console.log('Значения полей:', frontText, backText);
+
+            // Отправляем POST-запрос на сервер для добавления новой карточки
+            fetch('/Home/AddCard', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ front: frontText, back: backText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Ответ от сервера:', data);
+
+                // Если карточка была успешно добавлена, обновляем текст на карточке и переменные
+                if (data.success) {
+                    document.getElementById('cardText').innerText = frontText;
+                    isFront = true;
+                } else {
+                    // Если произошла ошибка при добавлении карточки, отображаем сообщение об ошибке
+                    alert('Ошибка при добавлении карточки: ' + data.error);
+                }
+
+                // Скрываем модальное окно
+                document.getElementById('modal').style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+        });
+    </script>
 
 </body>
 </html>

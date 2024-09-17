@@ -23,6 +23,29 @@
             };
         }
 
+        public static void InsertCardAtSecondPosition(Card head, string front, string back, int priority)
+        {
+            if (head.Next == null)
+            {
+                // Если в колоде только одна карточка, просто добавляем новую карточку в конец
+                AddCard(head, front, back, priority);
+            }
+            else
+            {
+                // Создаем новую карточку
+                var newCard = new Card
+                {
+                    Front = front,
+                    Back = back,
+                    Priority = priority,
+                    Next = head.Next
+                };
+
+                // Вставляем новую карточку на вторую позицию
+                head.Next = newCard;
+            }
+        }
+
         public Card MoveNext(Card head, bool notRemember = false)
         {
             Console.WriteLine();
@@ -52,7 +75,6 @@
             }
             while (runner.Next != null && runner.Next.Priority <= head.Priority);
 
-
             head.Next = runner.Next;
             runner.Next = head;
 
@@ -60,4 +82,5 @@
             return result;
         }
     }
+
 }
