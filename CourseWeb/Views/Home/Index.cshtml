@@ -264,7 +264,15 @@
                 isDelayActive = true;
                 setTimeout(function () {
                     isDelayActive = false;
-                }, 250); // 1 second delay
+                }, 250); // 250ms delay
+
+                // Снимаем текущее выделение
+                document.getSelection().removeAllRanges();
+
+                // Убираем фокус с активного элемента
+                if (document.activeElement) {
+                    document.activeElement.blur();
+                }
 
                 if (event.key === ' ') {
                     // Нажата клавиша пробел, повернуть карточку
@@ -313,25 +321,22 @@
                 },
                 body: JSON.stringify({ front: frontText, back: backText })
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Ответ от сервера:', data);
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Ответ от сервера:', data);
 
-                // Если карточка была успешно добавлена, обновляем текст на карточке и переменные
-                if (data.success) {
-                    document.getElementById('cardText').innerText = frontText;
-                    isFront = true;
-                } else {
-                    // Если произошла ошибка при добавлении карточки, отображаем сообщение об ошибке
-                    alert('Ошибка при добавлении карточки: ' + data.error);
-                }
-
-                // Скрываем модальное окно
-                document.getElementById('modal').style.display = 'none';
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-            });
+                    // Если карточка была успешно добавлена, просто скрываем модальное окно
+                    if (data.success) {
+                        // Скрываем модальное окно
+                        document.getElementById('modal').style.display = 'none';
+                    } else {
+                        // Если произошла ошибка при добавлении карточки, отображаем сообщение об ошибке
+                        alert('Ошибка при добавлении карточки: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                });
         });
     </script>
 

@@ -1,7 +1,13 @@
-﻿namespace CourseWeb.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace CourseWeb.Models
 {
     public class Card
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
         public string Front { get; set; }
         public string Back { get; set; }
         public Card? Next { get; set; }
