@@ -7,7 +7,7 @@
     <title>Главная страница</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        font-face {
+        @@font-face {
             font-family: 'Balkar';
             src: url('Balkar.ttf') format('truetype');
             font-weight: normal;
@@ -16,10 +16,12 @@
 
         body {
             font-family: sans-serif;
+            background-color: black; /* Фон всей страницы черный */
+            color: white; /* Текст на странице белый */
         }
 
         header {
-            background-color: #f0f0f0;
+            background-color: #007bff; /* Фон header такой же, как у кнопок */
             padding: 20px;
             display: flex;
             justify-content: space-between;
@@ -32,13 +34,14 @@
                 object-fit: cover;
             }
 
-        header h1 {
-            font-family: 'Balkar', 'Comic Sans MS', sans-serif;
-            font-size: 54px;
-            margin: 0;
-            flex-grow: 1;
-            text-align: center;
-        }
+            header h1 {
+                font-family: 'Balkar', 'Comic Sans MS', sans-serif;
+                font-size: 54px;
+                margin: 0;
+                flex-grow: 1;
+                text-align: center;
+                color: white; /* Текст заголовка белый */
+            }
 
         .container {
             display: flex;
@@ -51,7 +54,8 @@
             width: 1000px;
             height: 600px;
             border: 1px solid #ccc;
-            /* Здесь будет содержимое карточки */
+            background-color: white; /* Фон карточки белый */
+            color: black; /* Текст внутри карточки черный */
         }
 
         .buttons {
@@ -79,8 +83,8 @@
             .prev-button:hover, .next-button:hover {
                 background-color: yellow;
                 color: black;
-                
             }
+
         .delete-button, .add-button {
             margin: 0 5px;
         }
@@ -104,11 +108,30 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: white;
+            background-color: black; /* Фон модального окна черный */
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             z-index: 1000;
         }
+
+        .modal-content {
+            background-color: black; /* Фон содержимого модального окна черный */
+            color: white; /* Текст в модальном окне белый */
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+            .modal-content input {
+                margin-bottom: 10px;
+                width: 100%;
+                padding: 10px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+            }
+
+            .modal-content button {
+                margin-right: 10px;
+            }
     </style>
 </head>
 <body>
@@ -129,18 +152,20 @@
     <div class="actions">
         <button class="btn btn-info flip-button" style="width: calc(50% - 5px);">Перевернуть карточку</button>
     </div>
-    <div class="actions">        
+    <div class="actions">
         <button class="btn btn-success add-button">Добавить карточку</button>
-        <button class="btn btn-danger delete-button">Удалить карточку</button>        
+        <button class="btn btn-danger delete-button">Удалить карточку</button>
     </div>
 
     <!-- Модальное окно -->
     <div id="modal" class="modal">
-        <h2>Добавить карточку</h2>
-        <input type="text" id="frontInput" placeholder="Лицевая сторона">
-        <input type="text" id="backInput" placeholder="Обратная сторона">
-        <button id="okButton">ОК</button>
-        <button id="cancelButton">Отмена</button>
+        <div class="modal-content">
+            <h2>Добавить карточку</h2>
+            <input type="text" id="frontInput" placeholder="Лицевая сторона">
+            <input type="text" id="backInput" placeholder="Обратная сторона">
+            <button id="okButton" class="btn btn-primary">ОК</button>
+            <button id="cancelButton" class="btn btn-secondary">Отмена</button>
+        </div>
     </div>
 
     <!-- Скрипт переворота карточки -->
@@ -257,10 +282,11 @@
     <!-- Скрипт обработки нажатия клавиш -->
     <script>
         let isDelayActive = false;
+        let isModalOpen = false; // Переменная для отслеживания состояния модального окна
 
         // Обработка нажатия клавиш
         document.addEventListener('keydown', function (event) {
-            if (!isDelayActive) {
+            if (!isDelayActive && !isModalOpen) { // Проверяем, открыто ли модальное окно
                 isDelayActive = true;
                 setTimeout(function () {
                     isDelayActive = false;
@@ -293,8 +319,13 @@
         document.querySelector('.add-button').addEventListener('click', function () {
             console.log('Кнопка "Добавить карточку" была нажата');
 
+            // Очищаем поля ввода перед отображением модального окна
+            document.getElementById('frontInput').value = '';
+            document.getElementById('backInput').value = '';
+
             // Отображаем модальное окно
             document.getElementById('modal').style.display = 'block';
+            isModalOpen = true; // Устанавливаем флаг, что модальное окно открыто
         });
 
         document.getElementById('cancelButton').addEventListener('click', function () {
@@ -302,6 +333,7 @@
 
             // Скрываем модальное окно
             document.getElementById('modal').style.display = 'none';
+            isModalOpen = false; // Устанавливаем флаг, что модальное окно закрыто
         });
 
         document.getElementById('okButton').addEventListener('click', function () {
@@ -329,6 +361,7 @@
                     if (data.success) {
                         // Скрываем модальное окно
                         document.getElementById('modal').style.display = 'none';
+                        isModalOpen = false; // Устанавливаем флаг, что модальное окно закрыто
                     } else {
                         // Если произошла ошибка при добавлении карточки, отображаем сообщение об ошибке
                         alert('Ошибка при добавлении карточки: ' + data.error);

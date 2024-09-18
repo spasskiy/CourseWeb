@@ -1,34 +1,25 @@
 using CourseWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Linq;
 
 namespace CourseWeb.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        public HomeController(ILogger<HomeController> logger)
+        private readonly CardContext _context;
+
+        public HomeController(ILogger<HomeController> logger, CardContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index()
         {
-            if (CardKeeper.Head is null)
-            {
-                CardKeeper.Head = new Card
-                {
-                    Front = "Привет",
-                    Back = "Hello",
-                    Priority = 1
-                };
-
-                Card.AddCard(CardKeeper.Head, "Мир", "World", 1);
-                Card.AddCard(CardKeeper.Head, "Кот", "Cat", 1);
-                Card.AddCard(CardKeeper.Head, "Работа", "Work", 1);
-                Card.AddCard(CardKeeper.Head, "Дом", "Home", 1);
-            }
-            return View(CardKeeper.Head);
+            var head = _context.Cards.OrderBy(c => c.Priority).FirstOrDefault();
+            return View(head);
         }
 
         public IActionResult Privacy()
@@ -45,46 +36,48 @@ namespace CourseWeb.Controllers
         [HttpPost]
         public IActionResult RememberClick()
         {
-            if (CardKeeper.Head is not null)
-                CardKeeper.Head = CardKeeper.Head.MoveNext(CardKeeper.Head);
-            return Json(CardKeeper.Head);
+            var head = _context.Cards.OrderBy(c => c.Priority).FirstOrDefault();
+            if (head != null)
+            {
+                head.Priority += 1;
+                _context.SaveChanges();
+            }
+            return Json(head);
         }
 
         [HttpPost]
         public IActionResult NotRememberClick()
         {
-            if (CardKeeper.Head is not null)
-                CardKeeper.Head = CardKeeper.Head.MoveNext(CardKeeper.Head, true);
-            return Json(CardKeeper.Head);
+            var head = _context.Cards.OrderBy(c => c.Priority).FirstOrDefault();
+            if (head != null)
+            {
+                head.Priority = 1;
+                _context.SaveChanges();
+            }
+            return Json(head);
         }
 
         [HttpPost]
         public IActionResult DropCard()
         {
-            if (CardKeeper.Head is not null)
-                CardKeeper.Head = CardKeeper.Head.Next;
-            return Json(CardKeeper.Head);
+            var head = _context.Cards.OrderBy(c => c.Priority).FirstOrDefault();
+            if (head != null)
+            {
+                _context.Cards.Remove(head);
+                _context.SaveChanges();
+            }
+            return Json(_context.Cards.OrderBy(c => c.Priority).FirstOrDefault());
         }
 
         [HttpPost]
         public IActionResult AddCard([FromBody] Card newCard)
         {
-            if (CardKeeper.Head == null)
+            if (newCard != null)
             {
-                // Если колода пуста, создаем новую голову колоды
-                CardKeeper.Head = new Card
-                {
-                    Front = newCard.Front,
-                    Back = newCard.Back,
-                    Priority = 1
-                };
+                newCard.Priority = 1;
+                _context.Cards.Add(newCard);
+                _context.SaveChanges();
             }
-            else
-            {
-                // Вставляем новую карточку на вторую позицию
-                Card.InsertCardAtSecondPosition(CardKeeper.Head, newCard.Front, newCard.Back, 1);
-            }
-
             return Json(new { success = true });
         }
     }
